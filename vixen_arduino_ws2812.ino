@@ -20,10 +20,9 @@
 
 */
 
-#define NUM_LEDS 300
-#define DATA_PIN 6
+#define MAX_NUM_LEDS 300
 
-CRGB leds[NUM_LEDS];
+CRGB leds[MAX_NUM_LEDS];
 
 void setup() {
   Serial.begin(115200);
@@ -31,14 +30,12 @@ void setup() {
 
 void loop() {
   // Set some counter / temporary storage variables
-  unsigned int cnt;
   unsigned int num_leds;
   unsigned int d1, d2, d3, d4;
 
   // Begin an endless loop to receive and process serial data
   for (;;) {
-    // Set a counter to 0.  This couter keeps track of the pixel colors received.
-    cnt = 0;
+
     //Begin waiting for the header to be received on the serial bus
     //1st character
     while (!Serial.available());
@@ -74,11 +71,23 @@ void loop() {
     // calculate the number of pixels based on the characters provided in the header digits
     num_leds = (d1 - '0') * 1000 + (d2 - '0') * 100 + (d3 - '0') * 10 + (d4 - '0');
     // ensure the number of pixels does not exceed the number allowed
-    if (num_leds > NUM_LEDS) {
+    if (num_leds > MAX_NUM_LEDS) {
       continue;
     }
-    // Let the FastLED library know how many pixels we will be addressing
-    FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, num_leds);
+
+    FastLED.addLeds<WS2812B, 6, GRB>(leds, num_leds);
+    ledString(6, num_leds);
+    FastLED.show();
+  
+    FastLED.addLeds<WS2812B, 3, GRB>(leds, num_leds);
+    ledString(3, num_leds);
+    FastLED.show();
+  }
+}
+
+void ledString(int pin, unsigned int nleds) {
+    unsigned int cnt = 0;
+    
     // Loop through each of the pixels and read the values for each color
     do {
       while (!Serial.available());
@@ -89,9 +98,5 @@ void loop() {
       leds[cnt].b = Serial.read();
       cnt++;
     }
-    while (--num_leds);
-    // Tell the FastLED Library it is time to update the strip of pixels
-    FastLED.show();
-    // WOO HOO... We are all done and are ready to start over again!
-  }
+    while (--nleds);   
 }
