@@ -1,16 +1,17 @@
 #include <FastLED.h>
 
-#define STRINGS 2
+#define STRINGS 4
 #define LEDS_PER_STRING 300
-//#define SerialUSB Serial
+#define SerialComm SerialUSB
 #define STATUS_LED_PIN LED_BUILTIN
+// on the SAMD21 Mini Breakout this is the blue
 
 CRGB leds[STRINGS][LEDS_PER_STRING];
 unsigned int cnt = 0;
 char start_char = '>';
 
 void setup() {
-  Serial.begin(115200);
+  SerialComm.begin(921600);
   pinMode(STATUS_LED_PIN, OUTPUT);
   
   // TODO: try updating each string to see if the performance
@@ -20,8 +21,8 @@ void setup() {
 
   FastLED.addLeds<WS2812B, 3, GRB>(leds[0], LEDS_PER_STRING);
   FastLED.addLeds<WS2812B, 5, GRB>(leds[1], LEDS_PER_STRING);
-  //FastLED.addLeds<WS2812B, 27, GRB>(leds[2], LEDS_PER_STRING);
-  //FastLED.addLeds<WS2812B, 29, GRB>(leds[3], LEDS_PER_STRING);
+  FastLED.addLeds<WS2812B, 6, GRB>(leds[2], LEDS_PER_STRING);
+  FastLED.addLeds<WS2812B, 8, GRB>(leds[3], LEDS_PER_STRING);
   //FastLED.addLeds<WS2812B, 11, GRB>(leds[4], LEDS_PER_STRING);
   //FastLED.addLeds<WS2812B, 13, GRB>(leds[5], LEDS_PER_STRING);
   //FastLED.addLeds<WS2812B, 15, GRB>(leds[6], LEDS_PER_STRING);
@@ -31,8 +32,8 @@ void setup() {
 void loop() {
   while(true) {
     // wait for data
-    while (!Serial.available());
-    if (Serial.read() != start_char) {
+    while (!SerialComm.available());
+    if (SerialComm.read() != start_char) {
       continue;
     }
     
@@ -52,12 +53,12 @@ void loadLEDs(unsigned int string, unsigned int nleds) {
   cnt = 0;
   // Loop through each of the pixels and read the values for each color
   do {
-    while (!Serial.available());
-    leds[string][cnt].r = Serial.read();
-    while (!Serial.available());
-    leds[string][cnt].g = Serial.read();
-    while (!Serial.available());
-    leds[string][cnt].b = Serial.read();
+    while (!SerialComm.available());
+    leds[string][cnt].r = SerialComm.read();
+    while (!SerialComm.available());
+    leds[string][cnt].g = SerialComm.read();
+    while (!SerialComm.available());
+    leds[string][cnt].b = SerialComm.read();
     cnt++;
   }
   while (cnt < nleds);
