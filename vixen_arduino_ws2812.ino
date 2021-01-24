@@ -7,18 +7,22 @@
 // on the SAMD21 Mini Breakout this is the blue
 
 CRGB leds[STRINGS][LEDS_PER_STRING];
+//CLEDController* controllers[STRINGS];
 unsigned int cnt = 0;
-char start_char = '>';
+const char start_char = '>';
 
 void setup() {
   SerialComm.begin(921600);
   pinMode(STATUS_LED_PIN, OUTPUT);
-  
-  // TODO: try updating each string to see if the performance
-  // is any better.  I'm guessing there may be some jerkiness
-  // loading all LEDs before showing
-  //CLEDController* one = &
 
+  for (int i = 0; i < 8; i++) {
+    digitalWrite(STATUS_LED_PIN, HIGH);
+    delay(50);
+    digitalWrite(STATUS_LED_PIN, LOW);
+    delay(50);
+  }
+  
+  //controllers[0] = &
   FastLED.addLeds<WS2812B, 3, GRB>(leds[0], LEDS_PER_STRING);
   FastLED.addLeds<WS2812B, 5, GRB>(leds[1], LEDS_PER_STRING);
   FastLED.addLeds<WS2812B, 6, GRB>(leds[2], LEDS_PER_STRING);
@@ -30,20 +34,21 @@ void setup() {
 }
 
 void loop() {
-  while(true) {
+  while (true) {
     // wait for data
     while (!SerialComm.available());
     if (SerialComm.read() != start_char) {
       continue;
     }
-    
+
     // read from serial
     digitalWrite(STATUS_LED_PIN, HIGH);
-    for(int string=0; string<STRINGS; string++) {
+    for (int string = 0; string < STRINGS; string++) {
       loadLEDs(string, LEDS_PER_STRING);
+      //controllers[string]->showLeds();
     }
     digitalWrite(STATUS_LED_PIN, LOW);
-    
+
     // load into the strings
     FastLED.show();
   }
