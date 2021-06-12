@@ -22,5 +22,6 @@
 ![image](https://user-images.githubusercontent.com/590535/121105803-ca897e00-c7d2-11eb-9ded-807ec2bd4024.png)
 
 ## MCU programming
+* Designed for Sparkfun SAMD21 mini breakout
 * the controller will do a 5x fast blink initializtion during bootup and the blue LED should do dark.
 * When talking to Vixen the blue LED is rapid blinking
