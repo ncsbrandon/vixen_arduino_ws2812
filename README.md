@@ -23,5 +23,6 @@
 
 ## MCU programming
 * Designed for Sparkfun SAMD21 mini breakout
+* Use the boards manager to install Sparkfn SAMD 1.6.1 and Arduino SAMD 16.19
 * the controller will do a 5x fast blink initializtion during bootup and the blue LED should do dark.
 * When talking to Vixen the blue LED is rapid blinking
