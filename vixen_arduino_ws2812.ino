@@ -1,54 +1,57 @@
 #include <FastLED.h>
 
-#define STRINGS 4
+#define BAUD 115200
+#define STRINGS 1
+#define STRING1 0
+#define STRING2 1
+#define STRING3 2
+#define STRING4 3
 #define LEDS_PER_STRING 300
+const char start_char = '>';
+
 #define SerialComm SerialUSB
 #define STATUS_LED_PIN LED_BUILTIN
 // on the SAMD21 Mini Breakout this is the blue
 
 CRGB leds[STRINGS][LEDS_PER_STRING];
-//CLEDController* controllers[STRINGS];
 unsigned int cnt = 0;
-const char start_char = '>';
 
 void setup() {
-  SerialComm.begin(921600);
+  SerialComm.begin(BAUD);
+  
+  // wakeup blink
   pinMode(STATUS_LED_PIN, OUTPUT);
-
   for (int i = 0; i < 8; i++) {
     digitalWrite(STATUS_LED_PIN, HIGH);
     delay(50);
     digitalWrite(STATUS_LED_PIN, LOW);
     delay(50);
   }
-  
-  //controllers[0] = &
-  FastLED.addLeds<WS2812B, 3, GRB>(leds[0], LEDS_PER_STRING);
-  FastLED.addLeds<WS2812B, 5, GRB>(leds[1], LEDS_PER_STRING);
-  FastLED.addLeds<WS2812B, 6, GRB>(leds[2], LEDS_PER_STRING);
-  FastLED.addLeds<WS2812B, 8, GRB>(leds[3], LEDS_PER_STRING);
-  //FastLED.addLeds<WS2812B, 11, GRB>(leds[4], LEDS_PER_STRING);
-  //FastLED.addLeds<WS2812B, 13, GRB>(leds[5], LEDS_PER_STRING);
-  //FastLED.addLeds<WS2812B, 15, GRB>(leds[6], LEDS_PER_STRING);
-  //FastLED.addLeds<WS2812B, 17, GRB>(leds[7], LEDS_PER_STRING);
+
+  // map strings to pins
+  FastLED.addLeds<WS2812B, 3, GRB>(leds[STRING1], LEDS_PER_STRING);
+  //FastLED.addLeds<WS2812B, 5, GRB>(leds[STRING2], LEDS_PER_STRING);
+  //FastLED.addLeds<WS2812B, 6, GRB>(leds[STRING3], LEDS_PER_STRING);
+  //FastLED.addLeds<WS2812B, 8, GRB>(leds[STRING4], LEDS_PER_STRING);
 }
 
 void loop() {
   while (true) {
-    // wait for data
+    digitalWrite(STATUS_LED_PIN, HIGH);
+
+    // wait for start character
     while (!SerialComm.available());
     if (SerialComm.read() != start_char) {
+      digitalWrite(STATUS_LED_PIN, LOW);
       continue;
     }
-
+    
     // read from serial
-    digitalWrite(STATUS_LED_PIN, HIGH);
-    for (int string = 0; string < STRINGS; string++) {
-      loadLEDs(string, LEDS_PER_STRING);
-      //controllers[string]->showLeds();
-    }
-    digitalWrite(STATUS_LED_PIN, LOW);
-
+    loadLEDs(STRING1, LEDS_PER_STRING);
+    //loadLEDs(STRING2, LEDS_PER_STRING);
+    //loadLEDs(STRING3, LEDS_PER_STRING);
+    //loadLEDs(STRING4, LEDS_PER_STRING);
+    
     // load into the strings
     FastLED.show();
   }
