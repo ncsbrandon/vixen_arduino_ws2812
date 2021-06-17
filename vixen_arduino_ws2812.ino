@@ -1,22 +1,31 @@
 #include <FastLED.h>
 
-#define BAUD 115200
-#define STRINGS 1
-#define STRING1 0
-#define STRING2 1
-#define STRING3 2
-#define STRING4 3
-#define LEDS_PER_STRING 300
-const char start_char = '>';
-
+// serial settings
 #define SerialComm SerialUSB
+#define BAUD 115200
+
+// string settings
+#define LEDS_PER_STRING 300
+#define STRING_COUNT 4
+#define STRING1_INDEX 0
+#define STRING1_PIN 3
+#define STRING2_INDEX 1
+#define STRING2_PIN 5
+#define STRING3_INDEX 2
+#define STRING3_PIN 6
+#define STRING4_INDEX 3
+#define STRING4_PIN 8
+
+// other settings
 #define STATUS_LED_PIN LED_BUILTIN
 // on the SAMD21 Mini Breakout this is the blue
 
-CRGB leds[STRINGS][LEDS_PER_STRING];
-unsigned int cnt = 0;
+const char start_char = '>';
+CRGB leds[STRING_COUNT][LEDS_PER_STRING];
+unsigned int pos = 0;
 
 void setup() {
+  // serial init
   SerialComm.begin(BAUD);
   
   // wakeup blink
@@ -28,46 +37,45 @@ void setup() {
     delay(50);
   }
 
-  // map strings to pins
-  FastLED.addLeds<WS2812B, 3, GRB>(leds[STRING1], LEDS_PER_STRING);
-  //FastLED.addLeds<WS2812B, 5, GRB>(leds[STRING2], LEDS_PER_STRING);
-  //FastLED.addLeds<WS2812B, 6, GRB>(leds[STRING3], LEDS_PER_STRING);
-  //FastLED.addLeds<WS2812B, 8, GRB>(leds[STRING4], LEDS_PER_STRING);
+  // initialize each string's memory and pin
+  FastLED.addLeds<WS2812B, STRING1_PIN, GRB>(leds[STRING1_INDEX], LEDS_PER_STRING);
+  FastLED.addLeds<WS2812B, STRING2_PIN, GRB>(leds[STRING2_INDEX], LEDS_PER_STRING);
+  FastLED.addLeds<WS2812B, STRING3_PIN, GRB>(leds[STRING3_INDEX], LEDS_PER_STRING);
+  FastLED.addLeds<WS2812B, STRING4_PIN, GRB>(leds[STRING4_INDEX], LEDS_PER_STRING);
 }
 
 void loop() {
   while (true) {
-    digitalWrite(STATUS_LED_PIN, HIGH);
-
     // wait for start character
     while (!SerialComm.available());
     if (SerialComm.read() != start_char) {
       digitalWrite(STATUS_LED_PIN, LOW);
       continue;
     }
+    digitalWrite(STATUS_LED_PIN, HIGH);
+	
+    // read the string from serial
+    loadLEDs(STRING1_INDEX);
+    loadLEDs(STRING2_INDEX);
+    loadLEDs(STRING3_INDEX);
+    loadLEDs(STRING4_INDEX);
     
-    // read from serial
-    loadLEDs(STRING1, LEDS_PER_STRING);
-    //loadLEDs(STRING2, LEDS_PER_STRING);
-    //loadLEDs(STRING3, LEDS_PER_STRING);
-    //loadLEDs(STRING4, LEDS_PER_STRING);
-    
-    // load into the strings
+    // show
     FastLED.show();
   }
 }
 
-void loadLEDs(unsigned int string, unsigned int nleds) {
-  cnt = 0;
+void loadLEDs(unsigned int string) {
   // Loop through each of the pixels and read the values for each color
+  pos = 0;
   do {
     while (!SerialComm.available());
-    leds[string][cnt].r = SerialComm.read();
+    leds[string][pos].r = SerialComm.read();
     while (!SerialComm.available());
-    leds[string][cnt].g = SerialComm.read();
+    leds[string][pos].g = SerialComm.read();
     while (!SerialComm.available());
-    leds[string][cnt].b = SerialComm.read();
-    cnt++;
+    leds[string][pos].b = SerialComm.read();
+    pos++;
   }
-  while (cnt < nleds);
+  while (pos < LEDS_PER_STRING);
 }
