@@ -2,7 +2,7 @@
 
 // serial settings
 #define SerialComm SerialUSB
-#define BAUD 115200
+#define BAUD 921600
 
 // string settings
 #define LEDS_PER_STRING 300
